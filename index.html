@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Codex Pokémon</title>
+    <meta
+      name="description"
+      content="Codex Pokémon est un Pokédex moderne, animé et responsive pour explorer tous les Pokémon de toutes les générations."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div class="bg-orb orb-a" aria-hidden="true"></div>
+      <div class="bg-orb orb-b" aria-hidden="true"></div>
+      <div class="bg-mesh" aria-hidden="true"></div>
+
+      <header class="topbar">
+        <a class="brand" href="#hero" aria-label="Retour en haut">
+          <span class="brand-ball" aria-hidden="true"></span>
+          <span>Codex Pokémon</span>
+        </a>
+
+        <nav class="topnav" aria-label="Navigation principale">
+          <a href="#catalogue">Catalogue</a>
+          <a href="#insights">Insights</a>
+          <a href="#pokedex-app">Pokédex</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero section" id="hero">
+          <div class="hero-copy reveal">
+            <p class="eyebrow">Pokédex nouvelle génération</p>
+            <h1>Un catalogue Pokémon complet, rapide et vraiment abouti.</h1>
+            <p class="hero-text">
+              Explorez toutes les générations, filtrez par type, ouvrez des
+              fiches détaillées et parcourez une galerie de cartes animées,
+              pensée pour ordinateur comme pour mobile.
+            </p>
+
+            <div class="hero-actions">
+              <a class="button button-primary" href="#pokedex-app">Ouvrir le Pokédex</a>
+              <a class="button button-secondary" href="#insights">Voir les repères</a>
+            </div>
+
+            <div class="hero-metrics" id="hero-metrics">
+              <article>
+                <strong id="metric-total">1025</strong>
+                <span>Pokémon indexés</span>
+              </article>
+              <article>
+                <strong>9</strong>
+                <span>générations couvertes</span>
+              </article>
+              <article>
+                <strong>18</strong>
+                <span>types disponibles</span>
+              </article>
+            </div>
+          </div>
+
+          <div class="hero-panel reveal reveal-delay">
+            <div class="hero-card">
+              <div class="hero-card-top">
+                <p>Sélection premium</p>
+                <span class="status-pill">Temps réel</span>
+              </div>
+              <div class="hero-feature">
+                <img
+                  id="hero-feature-art"
+                  src="./assets/pokemon/1008.png"
+                  alt="Miraidon"
+                  loading="eager"
+                  decoding="async"
+                />
+                <div>
+                  <h2 id="hero-feature-name">Miraidon</h2>
+                  <p id="hero-feature-types">Électrik / Dragon</p>
+                </div>
+              </div>
+              <div class="hero-stats" id="hero-feature-stats">
+                <div>
+                  <span>Attaque spéciale</span>
+                  <strong>135</strong>
+                </div>
+                <div>
+                  <span>Vitesse</span>
+                  <strong>135</strong>
+                </div>
+                <div>
+                  <span>Indice méta</span>
+                  <strong>99%</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section insights" id="insights">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Vue d’ensemble</p>
+            <h2>Des repères rapides pour naviguer intelligemment dans tout le dex</h2>
+          </div>
+
+          <div class="insight-grid">
+            <article class="insight-card reveal">
+              <p class="insight-label">Générations</p>
+              <h3>De Kanto a Paldea</h3>
+              <p>
+                Passez d’une génération à l’autre en un geste pour isoler les
+                Pokémon de chaque époque sans perdre le contexte global.
+              </p>
+            </article>
+
+            <article class="insight-card reveal reveal-delay">
+              <p class="insight-label">Filtres</p>
+              <h3>Recherche, type et tri</h3>
+              <p>
+                Combinez nom, type, génération et tri pour passer d’un scan
+                rapide à une exploration experte.
+              </p>
+            </article>
+
+            <article class="insight-card reveal reveal-long">
+              <p class="insight-label">Cartes détaillées</p>
+              <h3>Fiche riche au clic</h3>
+              <p>
+                Chaque Pokémon ouvre une vue détaillée avec carte héros, stats,
+                mensurations, talents, sprites et contexte d’espèce.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section pokedex-app" id="pokedex-app">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Catalogue</p>
+            <h2>Tous les Pokémon, toutes les générations, dans une seule interface</h2>
+          </div>
+
+          <div class="control-panel reveal" id="catalogue">
+            <div class="search-bar">
+              <label class="sr-only" for="search-input">Rechercher un Pokémon</label>
+              <input
+                id="search-input"
+                type="search"
+                placeholder="Nom, numéro ou forme principale"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="control-row">
+              <div class="select-wrap">
+                <label class="sr-only" for="sort-select">Trier</label>
+                <select id="sort-select">
+                  <option value="id-asc">Numéro croissant</option>
+                  <option value="id-desc">Numéro décroissant</option>
+                  <option value="name-asc">Nom A-Z</option>
+                  <option value="name-desc">Nom Z-A</option>
+                </select>
+              </div>
+
+              <button class="button button-secondary reset-button" id="reset-filters" type="button">
+                Réinitialiser
+              </button>
+            </div>
+
+            <div class="filter-group">
+              <p>Générations</p>
+              <div class="chip-row filter-row" id="generation-filters"></div>
+            </div>
+
+            <div class="filter-group">
+              <p>Types</p>
+              <div class="chip-row filter-row" id="type-filters"></div>
+            </div>
+          </div>
+
+          <div class="results-bar reveal">
+            <div>
+              <strong id="results-count">0</strong>
+              <span>résultats affichés</span>
+            </div>
+            <div>
+              <strong id="visible-range">0</strong>
+              <span>cartes affichées</span>
+            </div>
+            <div>
+              <strong id="favorites-count">0</strong>
+              <span>favoris</span>
+            </div>
+          </div>
+
+          <div class="pokemon-grid" id="pokemon-grid" aria-live="polite"></div>
+
+          <div class="load-more-wrap">
+            <button class="button button-primary" id="load-more" type="button">
+              Charger plus de Pokémon
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <aside class="compare-panel" id="compare-panel" aria-live="polite">
+      <div class="compare-head">
+        <div>
+          <p class="eyebrow">Comparateur</p>
+          <h3>Deux Pokémon, un verdict rapide</h3>
+        </div>
+        <button class="button button-secondary compare-clear" id="compare-clear" type="button">
+          Vider
+        </button>
+      </div>
+      <div class="compare-slots" id="compare-slots"></div>
+      <div class="compare-stats" id="compare-stats"></div>
+    </aside>
+
+    <dialog class="detail-modal" id="detail-modal">
+      <button class="modal-close" id="modal-close" type="button" aria-label="Fermer la fiche">
+        Fermer
+      </button>
+
+      <div class="modal-layout">
+        <aside class="pokemon-card-showcase" id="pokemon-card-showcase">
+          <div class="pokemon-card-frame">
+            <div class="pokemon-card-gloss"></div>
+            <div class="pokemon-card-topline">
+              <span id="detail-card-id">#000</span>
+              <span id="detail-card-gen">Gen 1</span>
+            </div>
+            <div class="pokemon-card-art">
+              <img id="detail-art" src="" alt="" loading="lazy" decoding="async" />
+            </div>
+            <div class="pokemon-card-body">
+              <h2 id="detail-name">Pokémon</h2>
+              <div class="chip-row" id="detail-types"></div>
+              <p id="detail-flavor">
+                Chargement de la fiche détaillée en cours.
+              </p>
+            </div>
+          </div>
+        </aside>
+
+        <section class="modal-content">
+          <div class="modal-summary-grid">
+            <article>
+              <span>Taille</span>
+              <strong id="detail-height">-</strong>
+            </article>
+            <article>
+              <span>Poids</span>
+              <strong id="detail-weight">-</strong>
+            </article>
+            <article>
+              <span>Talents</span>
+              <strong id="detail-abilities">-</strong>
+            </article>
+          </div>
+
+          <div class="detail-block">
+            <div class="detail-block-head">
+              <h3>Statistiques</h3>
+              <span id="detail-bst">BST 0</span>
+            </div>
+            <div class="stats-list" id="detail-stats"></div>
+          </div>
+
+          <div class="detail-block">
+            <div class="detail-block-head">
+              <h3>Capacités et contexte</h3>
+              <span>Vue synthétique</span>
+            </div>
+            <div class="detail-grid">
+              <article>
+                <p class="mini-label">Expérience de base</p>
+                <strong id="detail-exp">-</strong>
+              </article>
+              <article>
+                <p class="mini-label">Taux de capture</p>
+                <strong id="detail-capture">-</strong>
+              </article>
+              <article>
+                <p class="mini-label">Habitat</p>
+                <strong id="detail-habitat">-</strong>
+              </article>
+              <article>
+                <p class="mini-label">Espèce principale</p>
+                <strong id="detail-species">-</strong>
+              </article>
+            </div>
+          </div>
+        </section>
+      </div>
+    </dialog>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
