@@ -1219,6 +1219,31 @@ img {
 
   .hero {
     min-height: auto;
+    /* Disable 3D perspective on mobile — prevents overflow/clipping bugs */
+    perspective: none;
+  }
+
+  /* Remove all translateZ — they conflict with overflow:hidden on mobile */
+  .hero-copy,
+  .hero-panel,
+  .hero-card {
+    transform-style: flat;
+    will-change: auto;
+  }
+
+  .hero-feature img {
+    margin-inline: auto;
+    transform: none;
+    animation: float-art 5s ease-in-out infinite;
+  }
+
+  .hero-feature h2,
+  .hero-card-top,
+  .hero-stats,
+  .hero-text,
+  .hero-actions,
+  .hero-metrics {
+    transform: none;
   }
 
   .hero h1,
@@ -1229,10 +1254,6 @@ img {
   .hero-feature {
     grid-template-columns: 1fr;
     text-align: center;
-  }
-
-  .hero-feature img {
-    margin-inline: auto;
   }
 
   .hero-stats,
@@ -1310,18 +1331,33 @@ img {
   }
 
   .compare-panel {
-    left: 1rem;
-    right: 1rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 5.5rem;
     width: auto;
+    max-height: 55dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
-  .compare-slots,
+  .compare-slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .compare-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) 3.8rem minmax(0, 1fr);
+    font-size: 0.82rem;
+    gap: 0.35rem;
+  }
+
+  .compare-row b {
+    min-width: auto;
+    font-size: 0.78rem;
   }
 
   .stat-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 5.5rem minmax(0, 1fr) 2.5rem;
+    gap: 0.5rem;
   }
 
   .pokemon-card-frame {
@@ -1336,20 +1372,74 @@ img {
   }
 
   .pokemon-card {
-    min-height: 20rem;
-    padding: 0.8rem;
+    min-height: 0;
+    padding: 0.75rem;
   }
 
   .pokemon-card-media {
-    min-height: 10rem;
+    min-height: 9rem;
+    margin-bottom: 0.7rem;
   }
 
   .pokemon-card-media img {
-    width: min(9rem, 78%);
+    width: min(8rem, 80%);
   }
 
   .pokemon-card h3 {
-    font-size: 1.35rem;
+    font-size: 1.1rem;
+    margin-top: 0.3rem;
+  }
+
+  /* Gen chip squishes the name — hide it on cards */
+  .pokemon-card .gen-chip {
+    display: none;
+  }
+
+  /* Meta text is too long for narrow cards — clamp to 2 lines */
+  .pokemon-card-meta {
+    font-size: 0.78rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Stack footer: types on top, buttons below */
+  .pokemon-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+    margin-top: 0.7rem;
+  }
+
+  /* 3 buttons in a compact grid */
+  .pokemon-card-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.2rem;
+    flex-wrap: nowrap;
+  }
+
+  .pokemon-card-button {
+    min-height: 2rem;
+    padding: 0.3rem 0.2rem;
+    font-size: 0.7rem;
+    border-radius: 0.6rem;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Type chips compact */
+  .pokemon-card-footer .chip-row {
+    flex-wrap: nowrap;
+    overflow: hidden;
+    gap: 0.3rem;
+  }
+
+  .pokemon-card-footer .type-chip {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    min-height: 1.6rem;
   }
 }
 

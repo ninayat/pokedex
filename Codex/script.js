@@ -554,7 +554,11 @@ function bestFlavorText(species) {
 }
 
 function initHeroParallax() {
+  // Disable on mobile (perspective:none in CSS) and reduced-motion
   if (!heroSection || !heroCopy || !heroCard || prefersReducedMotion.matches) {
+    return;
+  }
+  if (window.matchMedia("(max-width: 960px)").matches) {
     return;
   }
 
