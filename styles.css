@@ -21,6 +21,7 @@
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --duration: 220ms;
   --type-tint: rgba(239, 179, 71, 0.22);
+  --accent-glow: rgba(218, 70, 48, 0.32);
 }
 
 * {
@@ -99,15 +100,28 @@ img {
 .orb-a {
   top: 6rem;
   right: -8rem;
-  background: radial-gradient(circle, rgba(218, 70, 48, 0.34), transparent 70%);
+  width: 40rem;
+  background: radial-gradient(circle, rgba(218, 70, 48, 0.46), transparent 70%);
   animation: drift 18s ease-in-out infinite;
+  opacity: 0.72;
 }
 
 .orb-b {
   left: -10rem;
   bottom: 8rem;
-  background: radial-gradient(circle, rgba(37, 93, 143, 0.25), transparent 70%);
+  width: 40rem;
+  background: radial-gradient(circle, rgba(37, 93, 143, 0.36), transparent 70%);
   animation: drift 20s ease-in-out infinite reverse;
+  opacity: 0.72;
+}
+
+.orb-c {
+  right: 20%;
+  bottom: 30%;
+  width: 30rem;
+  background: radial-gradient(circle, rgba(239, 179, 71, 0.30), transparent 70%);
+  animation: drift 22s ease-in-out infinite;
+  opacity: 0.55;
 }
 
 .bg-mesh {
@@ -276,7 +290,27 @@ img {
 .button-primary {
   color: #fff8ef;
   background: linear-gradient(135deg, var(--accent) 0%, #ee6f31 100%);
-  box-shadow: 0 18px 34px rgba(218, 70, 48, 0.24);
+  box-shadow: 0 18px 34px rgba(218, 70, 48, 0.28);
+  position: relative;
+  overflow: hidden;
+}
+
+.button-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.30) 50%, transparent 65%);
+  background-size: 200% auto;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 180ms;
+  pointer-events: none;
+}
+
+.button-primary:hover::after,
+.button-primary:focus-visible::after {
+  opacity: 1;
+  animation: shimmer-badge 0.65s linear;
 }
 
 .button-secondary {
@@ -345,6 +379,9 @@ img {
   overflow: hidden;
   transform-style: preserve-3d;
   will-change: transform;
+  box-shadow: 0 40px 80px rgba(66, 35, 18, 0.22), 0 0 0 1px rgba(218, 70, 48, 0.10);
+  background: linear-gradient(145deg, rgba(255, 248, 238, 0.94) 0%, rgba(255, 240, 220, 0.90) 100%);
+  backdrop-filter: blur(22px);
 }
 
 .hero-card::before {
@@ -579,6 +616,7 @@ img {
   --spot-y: 50%;
   --card-accent: var(--type-tint);
   --card-accent-strong: rgba(218, 70, 48, 0.22);
+  border-top: 2px solid var(--type-border, rgba(88, 52, 34, 0.11));
 }
 
 .pokemon-card::before {
@@ -600,7 +638,9 @@ img {
 
 .pokemon-card:hover,
 .pokemon-card:focus-visible {
-  box-shadow: 0 28px 54px rgba(60, 31, 17, 0.18);
+  box-shadow:
+    0 28px 54px rgba(60, 31, 17, 0.18),
+    0 8px 32px var(--type-glow, var(--accent-glow));
 }
 
 .pokemon-card-media {
@@ -621,12 +661,17 @@ img {
   aspect-ratio: 1;
   object-fit: contain;
   filter: drop-shadow(0 18px 18px rgba(24, 21, 17, 0.14));
-  transition: transform 260ms var(--ease);
+  transition: transform 260ms var(--ease), filter 260ms var(--ease);
 }
 
 .pokemon-card:hover .pokemon-card-media img,
 .pokemon-card:focus-visible .pokemon-card-media img {
   transform: translateY(-6px) scale(1.05);
+  filter: drop-shadow(0 22px 20px var(--type-glow, rgba(24, 21, 17, 0.20)));
+}
+
+.pokemon-card.fav-swipe {
+  animation: fav-flash 0.55s var(--ease);
 }
 
 .pokemon-card::after {
@@ -1018,6 +1063,9 @@ img {
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, var(--accent), var(--gold));
+  width: 0%;
+  animation: fill-bar 700ms var(--ease) forwards;
+  animation-delay: var(--bar-delay, 0ms);
 }
 
 .detail-grid {
@@ -1058,43 +1106,43 @@ img {
   transition-delay: 140ms;
 }
 
-.type-normal { background: rgba(168, 167, 122, 0.16); }
-.type-fire { background: rgba(238, 129, 48, 0.18); }
-.type-water { background: rgba(99, 144, 240, 0.18); }
-.type-electric { background: rgba(247, 208, 44, 0.22); }
-.type-grass { background: rgba(122, 199, 76, 0.18); }
-.type-ice { background: rgba(150, 217, 214, 0.2); }
-.type-fighting { background: rgba(194, 46, 40, 0.16); }
-.type-poison { background: rgba(163, 62, 161, 0.16); }
-.type-ground { background: rgba(226, 191, 101, 0.22); }
-.type-flying { background: rgba(169, 143, 243, 0.18); }
-.type-psychic { background: rgba(249, 85, 135, 0.16); }
-.type-bug { background: rgba(166, 185, 26, 0.18); }
-.type-rock { background: rgba(182, 161, 54, 0.2); }
-.type-ghost { background: rgba(115, 87, 151, 0.18); }
-.type-dragon { background: rgba(111, 53, 252, 0.18); }
-.type-dark { background: rgba(112, 87, 70, 0.18); }
-.type-steel { background: rgba(183, 183, 206, 0.2); }
-.type-fairy { background: rgba(214, 133, 173, 0.18); }
+.type-normal   { background: rgba(168, 167, 122, 0.26); }
+.type-fire     { background: rgba(238, 129, 48, 0.28); }
+.type-water    { background: rgba(99, 144, 240, 0.28); }
+.type-electric { background: rgba(247, 208, 44, 0.34); }
+.type-grass    { background: rgba(122, 199, 76, 0.28); }
+.type-ice      { background: rgba(150, 217, 214, 0.30); }
+.type-fighting { background: rgba(194, 46, 40, 0.26); }
+.type-poison   { background: rgba(163, 62, 161, 0.26); }
+.type-ground   { background: rgba(226, 191, 101, 0.34); }
+.type-flying   { background: rgba(169, 143, 243, 0.28); }
+.type-psychic  { background: rgba(249, 85, 135, 0.26); }
+.type-bug      { background: rgba(166, 185, 26, 0.28); }
+.type-rock     { background: rgba(182, 161, 54, 0.30); }
+.type-ghost    { background: rgba(115, 87, 151, 0.28); }
+.type-dragon   { background: rgba(111, 53, 252, 0.28); }
+.type-dark     { background: rgba(112, 87, 70, 0.28); }
+.type-steel    { background: rgba(183, 183, 206, 0.30); }
+.type-fairy    { background: rgba(214, 133, 173, 0.28); }
 
-.card-type-normal { --card-accent: rgba(168, 167, 122, 0.42); --card-accent-strong: rgba(168, 167, 122, 0.28); }
-.card-type-fire { --card-accent: rgba(238, 129, 48, 0.54); --card-accent-strong: rgba(238, 129, 48, 0.34); }
-.card-type-water { --card-accent: rgba(99, 144, 240, 0.5); --card-accent-strong: rgba(99, 144, 240, 0.32); }
-.card-type-electric { --card-accent: rgba(247, 208, 44, 0.6); --card-accent-strong: rgba(247, 208, 44, 0.34); }
-.card-type-grass { --card-accent: rgba(122, 199, 76, 0.5); --card-accent-strong: rgba(122, 199, 76, 0.32); }
-.card-type-ice { --card-accent: rgba(150, 217, 214, 0.52); --card-accent-strong: rgba(150, 217, 214, 0.32); }
-.card-type-fighting { --card-accent: rgba(194, 46, 40, 0.5); --card-accent-strong: rgba(194, 46, 40, 0.32); }
-.card-type-poison { --card-accent: rgba(163, 62, 161, 0.48); --card-accent-strong: rgba(163, 62, 161, 0.3); }
-.card-type-ground { --card-accent: rgba(226, 191, 101, 0.54); --card-accent-strong: rgba(226, 191, 101, 0.34); }
-.card-type-flying { --card-accent: rgba(169, 143, 243, 0.48); --card-accent-strong: rgba(169, 143, 243, 0.3); }
-.card-type-psychic { --card-accent: rgba(249, 85, 135, 0.48); --card-accent-strong: rgba(249, 85, 135, 0.3); }
-.card-type-bug { --card-accent: rgba(166, 185, 26, 0.5); --card-accent-strong: rgba(166, 185, 26, 0.3); }
-.card-type-rock { --card-accent: rgba(182, 161, 54, 0.5); --card-accent-strong: rgba(182, 161, 54, 0.3); }
-.card-type-ghost { --card-accent: rgba(115, 87, 151, 0.48); --card-accent-strong: rgba(115, 87, 151, 0.3); }
-.card-type-dragon { --card-accent: rgba(111, 53, 252, 0.5); --card-accent-strong: rgba(111, 53, 252, 0.32); }
-.card-type-dark { --card-accent: rgba(112, 87, 70, 0.48); --card-accent-strong: rgba(112, 87, 70, 0.3); }
-.card-type-steel { --card-accent: rgba(183, 183, 206, 0.52); --card-accent-strong: rgba(183, 183, 206, 0.32); }
-.card-type-fairy { --card-accent: rgba(214, 133, 173, 0.48); --card-accent-strong: rgba(214, 133, 173, 0.3); }
+.card-type-normal   { --card-accent: rgba(168, 167, 122, 0.42); --card-accent-strong: rgba(168, 167, 122, 0.28); --type-glow: rgba(168, 167, 122, 0.36); --type-border: rgba(168, 167, 122, 0.44); }
+.card-type-fire     { --card-accent: rgba(238, 129, 48, 0.54);  --card-accent-strong: rgba(238, 129, 48, 0.34);  --type-glow: rgba(238, 129, 48, 0.42);  --type-border: rgba(238, 129, 48, 0.50); }
+.card-type-water    { --card-accent: rgba(99, 144, 240, 0.50);  --card-accent-strong: rgba(99, 144, 240, 0.32);  --type-glow: rgba(99, 144, 240, 0.40);  --type-border: rgba(99, 144, 240, 0.48); }
+.card-type-electric { --card-accent: rgba(247, 208, 44, 0.60);  --card-accent-strong: rgba(247, 208, 44, 0.34);  --type-glow: rgba(247, 208, 44, 0.44);  --type-border: rgba(247, 208, 44, 0.54); }
+.card-type-grass    { --card-accent: rgba(122, 199, 76, 0.50);  --card-accent-strong: rgba(122, 199, 76, 0.32);  --type-glow: rgba(122, 199, 76, 0.40);  --type-border: rgba(122, 199, 76, 0.48); }
+.card-type-ice      { --card-accent: rgba(150, 217, 214, 0.52); --card-accent-strong: rgba(150, 217, 214, 0.32); --type-glow: rgba(150, 217, 214, 0.40); --type-border: rgba(150, 217, 214, 0.48); }
+.card-type-fighting { --card-accent: rgba(194, 46, 40, 0.50);   --card-accent-strong: rgba(194, 46, 40, 0.32);   --type-glow: rgba(194, 46, 40, 0.40);   --type-border: rgba(194, 46, 40, 0.48); }
+.card-type-poison   { --card-accent: rgba(163, 62, 161, 0.48);  --card-accent-strong: rgba(163, 62, 161, 0.30);  --type-glow: rgba(163, 62, 161, 0.38);  --type-border: rgba(163, 62, 161, 0.46); }
+.card-type-ground   { --card-accent: rgba(226, 191, 101, 0.54); --card-accent-strong: rgba(226, 191, 101, 0.34); --type-glow: rgba(226, 191, 101, 0.42); --type-border: rgba(226, 191, 101, 0.52); }
+.card-type-flying   { --card-accent: rgba(169, 143, 243, 0.48); --card-accent-strong: rgba(169, 143, 243, 0.30); --type-glow: rgba(169, 143, 243, 0.38); --type-border: rgba(169, 143, 243, 0.46); }
+.card-type-psychic  { --card-accent: rgba(249, 85, 135, 0.48);  --card-accent-strong: rgba(249, 85, 135, 0.30);  --type-glow: rgba(249, 85, 135, 0.38);  --type-border: rgba(249, 85, 135, 0.46); }
+.card-type-bug      { --card-accent: rgba(166, 185, 26, 0.50);  --card-accent-strong: rgba(166, 185, 26, 0.30);  --type-glow: rgba(166, 185, 26, 0.40);  --type-border: rgba(166, 185, 26, 0.48); }
+.card-type-rock     { --card-accent: rgba(182, 161, 54, 0.50);  --card-accent-strong: rgba(182, 161, 54, 0.30);  --type-glow: rgba(182, 161, 54, 0.40);  --type-border: rgba(182, 161, 54, 0.48); }
+.card-type-ghost    { --card-accent: rgba(115, 87, 151, 0.48);  --card-accent-strong: rgba(115, 87, 151, 0.30);  --type-glow: rgba(115, 87, 151, 0.38);  --type-border: rgba(115, 87, 151, 0.46); }
+.card-type-dragon   { --card-accent: rgba(111, 53, 252, 0.50);  --card-accent-strong: rgba(111, 53, 252, 0.32);  --type-glow: rgba(111, 53, 252, 0.40);  --type-border: rgba(111, 53, 252, 0.48); }
+.card-type-dark     { --card-accent: rgba(112, 87, 70, 0.48);   --card-accent-strong: rgba(112, 87, 70, 0.30);   --type-glow: rgba(112, 87, 70, 0.38);   --type-border: rgba(112, 87, 70, 0.46); }
+.card-type-steel    { --card-accent: rgba(183, 183, 206, 0.52); --card-accent-strong: rgba(183, 183, 206, 0.32); --type-glow: rgba(183, 183, 206, 0.40); --type-border: rgba(183, 183, 206, 0.48); }
+.card-type-fairy    { --card-accent: rgba(214, 133, 173, 0.48); --card-accent-strong: rgba(214, 133, 173, 0.30); --type-glow: rgba(214, 133, 173, 0.38); --type-border: rgba(214, 133, 173, 0.46); }
 
 :focus-visible {
   outline: 3px solid rgba(37, 93, 143, 0.42);
@@ -1111,6 +1159,49 @@ img {
   0%,
   100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
+}
+
+@keyframes shimmer-badge {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes fill-bar {
+  to { width: var(--bar-fill, 0%); }
+}
+
+@keyframes fav-flash {
+  0%   { box-shadow: 0 0 0 0 rgba(239, 179, 71, 0.70), var(--shadow); }
+  60%  { box-shadow: 0 0 0 18px rgba(239, 179, 71, 0.00), var(--shadow); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 179, 71, 0.00), var(--shadow); }
+}
+
+/* === FAB mobile === */
+.fab-filter {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 30;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  border: 0;
+  background: linear-gradient(135deg, var(--accent) 0%, #ee6f31 100%);
+  color: #fff8ef;
+  box-shadow: 0 8px 24px rgba(218, 70, 48, 0.42), 0 2px 8px rgba(218, 70, 48, 0.22);
+  transition: transform 220ms var(--ease), box-shadow 220ms var(--ease);
+  align-items: center;
+  justify-content: center;
+}
+
+.fab-filter:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 12px 32px rgba(218, 70, 48, 0.52), 0 4px 12px rgba(218, 70, 48, 0.28);
+}
+
+.fab-filter:active {
+  transform: scale(0.93);
 }
 
 @media (max-width: 1100px) {
@@ -1196,7 +1287,26 @@ img {
   }
 
   .pokemon-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .fab-filter {
+    display: flex;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    right: calc(1.5rem + env(safe-area-inset-right, 0px));
+  }
+
+  .chip-row.filter-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+
+  .chip-row.filter-row::-webkit-scrollbar {
+    display: none;
   }
 
   .compare-panel {
@@ -1216,6 +1326,30 @@ img {
 
   .pokemon-card-frame {
     min-height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .pokemon-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .pokemon-card {
+    min-height: 20rem;
+    padding: 0.8rem;
+  }
+
+  .pokemon-card-media {
+    min-height: 10rem;
+  }
+
+  .pokemon-card-media img {
+    width: min(9rem, 78%);
+  }
+
+  .pokemon-card h3 {
+    font-size: 1.35rem;
   }
 }
 

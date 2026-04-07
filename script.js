@@ -459,15 +459,17 @@ async function hydrateVisibleCardTypes(items) {
 
 function bindCardInteractions() {
   document.querySelectorAll(".pokemon-card").forEach((card) => {
+    const pokemonId = Number(card.getAttribute("data-id"));
+
     if (!prefersReducedMotion.matches) {
       card.addEventListener("pointermove", (event) => {
         const bounds = card.getBoundingClientRect();
         const offsetX = event.clientX - bounds.left;
         const offsetY = event.clientY - bounds.top;
-        const rotateY = ((offsetX / bounds.width) - 0.5) * 10;
-        const rotateX = (0.5 - offsetY / bounds.height) * 10;
+        const rotateY = ((offsetX / bounds.width) - 0.5) * 12;
+        const rotateX = (0.5 - offsetY / bounds.height) * 12;
 
-        card.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
+        card.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
         card.style.setProperty("--spot-x", `${offsetX}px`);
         card.style.setProperty("--spot-y", `${offsetY}px`);
       });
@@ -475,6 +477,19 @@ function bindCardInteractions() {
       card.addEventListener("pointerleave", () => {
         card.style.transform = "";
       });
+
+      // Swipe droite → toggle favori
+      let touchStartX = 0;
+      card.addEventListener("touchstart", (e) => {
+        touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+      card.addEventListener("touchend", (e) => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (dx > 100) {
+          card.classList.add("fav-swipe");
+          setTimeout(() => toggleFavorite(pokemonId), 380);
+        }
+      }, { passive: true });
     }
 
     const openDetail = async () => {
@@ -711,13 +726,13 @@ async function openDetailModal(id) {
     els.detailBST.textContent = `BST ${totalBaseStats(detail.stats)}`;
 
     els.detailStats.innerHTML = detail.stats
-      .map((entry) => {
+      .map((entry, index) => {
         const label = capitalize(entry.stat.name.replace("-", " "));
-        const width = Math.min(100, Math.round((entry.base_stat / MAX_BAR_VALUE) * 100));
+        const pct = Math.min(100, Math.round((entry.base_stat / MAX_BAR_VALUE) * 100));
         return `
           <div class="stat-row">
             <span>${label}</span>
-            <div class="stat-bar"><i style="width:${width}%"></i></div>
+            <div class="stat-bar"><i style="--bar-fill:${pct}%;--bar-delay:${index * 80}ms"></i></div>
             <strong>${entry.base_stat}</strong>
           </div>
         `;
@@ -786,6 +801,32 @@ function bindControls() {
       els.modal.close();
     }
   });
+
+  // FAB: scroll vers les filtres et focus sur la recherche
+  const fabFilter = document.querySelector("#fab-filter");
+  if (fabFilter) {
+    fabFilter.addEventListener("click", () => {
+      const panel = document.querySelector("#catalogue");
+      if (panel) {
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(() => els.searchInput?.focus(), 400);
+      }
+    });
+  }
+
+  // Swipe bas sur le modal pour le fermer
+  if (els.modal && !prefersReducedMotion.matches) {
+    let modalTouchStartY = 0;
+    els.modal.addEventListener("touchstart", (e) => {
+      modalTouchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    els.modal.addEventListener("touchend", (e) => {
+      const dy = e.changedTouches[0].clientY - modalTouchStartY;
+      if (dy > 80) {
+        els.modal.close();
+      }
+    }, { passive: true });
+  }
 }
 
 function renderLoadingState() {
