@@ -700,35 +700,19 @@ function renderHeroFeature(detail) {
   `;
 }
 
-const TCG_GRAPHQL = "https://api.tcgdex.net/v2/graphql";
+const TCG_REST = "https://api.tcgdex.net/v2/en";
 const tcgCache = new Map();
 
 async function fetchTcgCards(englishName) {
   const key = englishName.toLowerCase();
   if (tcgCache.has(key)) return tcgCache.get(key);
 
-  const query = `
-    query ($name: String) {
-      cards(filters: { name: $name }) {
-        name
-        image
-        rarity
-        set { name }
-      }
-    }
-  `;
-
   try {
-    const res = await fetch(TCG_GRAPHQL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, variables: { name: englishName } }),
-    });
-    if (!res.ok) throw new Error("TCGdex GraphQL error");
-    const json = await res.json();
-    if (json.errors?.length) throw new Error(json.errors[0].message);
-    const filtered = Array.isArray(json.data?.cards)
-      ? json.data.cards.filter((c) => c.image).slice(0, 30)
+    const res = await fetch(`${TCG_REST}/cards?name=${encodeURIComponent(englishName)}`);
+    if (!res.ok) throw new Error(`TCGdex HTTP ${res.status}`);
+    const data = await res.json();
+    const filtered = Array.isArray(data)
+      ? data.filter((c) => c.image).slice(0, 30)
       : [];
     tcgCache.set(key, filtered);
     return filtered;
@@ -752,11 +736,9 @@ function renderTcgGallery(cards) {
 
   els.tcgScroll.innerHTML = cards
     .map((card) => {
-      const imgSrc = `${card.image}.webp`;
-      const imgFallback = `${card.image}.png`;
-      const setName = card.set?.name || "";
-      const rarity = card.rarity || "";
-      const alt = `${card.name}${setName ? " — " + setName : ""}`;
+      const imgSrc = `${card.image}/high.webp`;
+      const imgFallback = `${card.image}/low.webp`;
+      const alt = card.name || "";
       return `
         <button class="tcg-card-item" type="button" data-img="${imgSrc}" data-fallback="${imgFallback}" data-alt="${alt}" aria-label="Agrandir ${alt}">
           <img
@@ -766,8 +748,6 @@ function renderTcgGallery(cards) {
             decoding="async"
             onerror="this.src='${imgFallback}'"
           />
-          <p class="tcg-card-meta">${setName}</p>
-          ${rarity ? `<p class="tcg-card-rarity">${rarity}</p>` : ""}
         </button>
       `;
     })
