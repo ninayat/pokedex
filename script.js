@@ -424,39 +424,29 @@ function renderGrid() {
 }
 
 async function hydrateVisibleCardTypes(items) {
-  const batch = items;
   await Promise.all(
-    batch.map(async (item) => {
+    items.map(async (item) => {
       try {
         const [detail, species] = await Promise.all([
           getPokemonDetail(item.id),
           getPokemonSpecies(item.id),
         ]);
-        const target = document.querySelector(`[data-types-for="${item.id}"]`);
-        const nameTarget = document.querySelector(`[data-name-for="${item.id}"]`);
-        const metaTarget = document.querySelector(`[data-meta-for="${item.id}"]`);
-        const artTarget = document.querySelector(`[data-art-for="${item.id}"]`);
-        if (!target) {
-          return;
-        }
+        // Portée limitée à la carte pour éviter document.querySelector global
+        const card = els.pokemonGrid?.querySelector(`.pokemon-card[data-id="${item.id}"]`);
+        if (!card) return;
 
         const types = detail.types.map((entry) => entry.type.name);
         const frenchName = localizedSpeciesName(species, detail.name);
-        target.innerHTML = createTypeChips(types);
-        const card = document.querySelector(`.pokemon-card[data-id="${item.id}"]`);
-        if (card) {
-          card.classList.add(primaryTypeClass(types));
-        }
-        if (nameTarget) {
-          nameTarget.textContent = frenchName;
-        }
-        if (metaTarget) {
-          metaTarget.textContent = `${item.generationLabel} / ${types.map(typeLabel).join(" / ")} / Cliquez pour ouvrir la fiche détaillée et la carte héros.`;
-        }
-        if (artTarget) {
-          artTarget.src = getArtworkFromDetail(detail);
-          artTarget.alt = frenchName;
-        }
+
+        card.classList.add(primaryTypeClass(types));
+        const target = card.querySelector("[data-types-for]");
+        if (target) target.innerHTML = createTypeChips(types);
+        const nameTarget = card.querySelector("[data-name-for]");
+        if (nameTarget) nameTarget.textContent = frenchName;
+        const metaTarget = card.querySelector("[data-meta-for]");
+        if (metaTarget) metaTarget.textContent = `${item.generationLabel} / ${types.map(typeLabel).join(" / ")} / Cliquez pour ouvrir la fiche détaillée et la carte héros.`;
+        const artTarget = card.querySelector("[data-art-for]");
+        if (artTarget) { artTarget.src = getArtworkFromDetail(detail); artTarget.alt = frenchName; }
       } catch (error) {
         console.error(error);
       }
@@ -465,66 +455,70 @@ async function hydrateVisibleCardTypes(items) {
 }
 
 function bindCardInteractions() {
-  document.querySelectorAll(".pokemon-card").forEach((card) => {
-    const pokemonId = Number(card.getAttribute("data-id"));
+  const grid = els.pokemonGrid;
+  if (!grid) return;
 
-    if (!prefersReducedMotion.matches) {
+  // rAF-throttled parallax per card (keep per-card for accurate pointerleave)
+  if (!prefersReducedMotion.matches) {
+    grid.querySelectorAll(".pokemon-card").forEach((card) => {
+      let rafId = null;
       card.addEventListener("pointermove", (event) => {
-        const bounds = card.getBoundingClientRect();
-        const offsetX = event.clientX - bounds.left;
-        const offsetY = event.clientY - bounds.top;
-        const rotateY = ((offsetX / bounds.width) - 0.5) * 12;
-        const rotateX = (0.5 - offsetY / bounds.height) * 12;
-
-        card.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
-        card.style.setProperty("--spot-x", `${offsetX}px`);
-        card.style.setProperty("--spot-y", `${offsetY}px`);
+        if (rafId) return;
+        const clientX = event.clientX;
+        const clientY = event.clientY;
+        rafId = requestAnimationFrame(() => {
+          const bounds = card.getBoundingClientRect();
+          const offsetX = clientX - bounds.left;
+          const offsetY = clientY - bounds.top;
+          const rotateY = ((offsetX / bounds.width) - 0.5) * 12;
+          const rotateX = (0.5 - offsetY / bounds.height) * 12;
+          card.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
+          card.style.setProperty("--spot-x", `${offsetX}px`);
+          card.style.setProperty("--spot-y", `${offsetY}px`);
+          rafId = null;
+        });
       });
-
       card.addEventListener("pointerleave", () => {
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
         card.style.transform = "";
       });
+    });
 
-      // Swipe droite → toggle favori
-      let touchStartX = 0;
-      card.addEventListener("touchstart", (e) => {
-        touchStartX = e.touches[0].clientX;
-      }, { passive: true });
-      card.addEventListener("touchend", (e) => {
-        const dx = e.changedTouches[0].clientX - touchStartX;
-        if (dx > 100) {
-          card.classList.add("fav-swipe");
-          setTimeout(() => toggleFavorite(pokemonId), 380);
-        }
-      }, { passive: true });
-    }
-
-    const openDetail = async () => {
-      const id = Number(card.getAttribute("data-id"));
-      await openDetailModal(id);
-    };
-
-    card.addEventListener("click", openDetail);
-    card.addEventListener("keydown", async (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        await openDetail();
+    // Swipe droite → toggle favori (délégué au grid)
+    let touchStartX = 0;
+    let touchCard = null;
+    grid.addEventListener("touchstart", (e) => {
+      touchCard = e.target.closest(".pokemon-card");
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    grid.addEventListener("touchend", (e) => {
+      if (!touchCard) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (dx > 100) {
+        touchCard.classList.add("fav-swipe");
+        const id = Number(touchCard.getAttribute("data-id"));
+        setTimeout(() => toggleFavorite(id), 380);
       }
-    });
+      touchCard = null;
+    }, { passive: true });
+  }
+
+  // Délégation unique pour clics (favori, comparer, détail)
+  grid.addEventListener("click", async (event) => {
+    const favBtn = event.target.closest("[data-favorite]");
+    if (favBtn) { event.stopPropagation(); toggleFavorite(Number(favBtn.getAttribute("data-favorite"))); return; }
+    const cmpBtn = event.target.closest("[data-compare]");
+    if (cmpBtn) { event.stopPropagation(); toggleCompare(Number(cmpBtn.getAttribute("data-compare"))); return; }
+    const card = event.target.closest(".pokemon-card");
+    if (card) await openDetailModal(Number(card.getAttribute("data-id")));
   });
 
-  document.querySelectorAll("[data-favorite]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.stopPropagation();
-      toggleFavorite(Number(button.getAttribute("data-favorite")));
-    });
-  });
-
-  document.querySelectorAll("[data-compare]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.stopPropagation();
-      toggleCompare(Number(button.getAttribute("data-compare")));
-    });
+  grid.addEventListener("keydown", async (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const card = event.target.closest(".pokemon-card");
+    if (!card) return;
+    event.preventDefault();
+    await openDetailModal(Number(card.getAttribute("data-id")));
   });
 }
 
@@ -534,21 +528,39 @@ function toggleFavorite(id) {
   } else {
     state.favorites.add(id);
   }
-
   saveFavorites();
-  renderGrid();
+
+  // Patch uniquement le bouton concerné, pas de re-render complet
+  const isFav = state.favorites.has(id);
+  const btn = els.pokemonGrid?.querySelector(`[data-favorite="${id}"]`);
+  if (btn) {
+    btn.textContent = isFav ? "Favori" : "Favori +";
+    btn.classList.toggle("is-favorite", isFav);
+  }
+  if (els.favoritesCount) els.favoritesCount.textContent = String(state.favorites.size);
 }
 
 function toggleCompare(id) {
+  const prevIds = [...state.compareIds];
+
   if (state.compareIds.includes(id)) {
-    state.compareIds = state.compareIds.filter((value) => value !== id);
+    state.compareIds = state.compareIds.filter((v) => v !== id);
   } else if (state.compareIds.length < 2) {
     state.compareIds = [...state.compareIds, id];
   } else {
     state.compareIds = [state.compareIds[1], id];
   }
 
-  renderGrid();
+  // Patch uniquement les boutons qui ont changé
+  prevIds.filter((pid) => !state.compareIds.includes(pid)).forEach((pid) => {
+    const btn = els.pokemonGrid?.querySelector(`[data-compare="${pid}"]`);
+    if (btn) { btn.textContent = "Comparer"; btn.classList.remove("is-compare"); }
+  });
+  state.compareIds.filter((cid) => !prevIds.includes(cid)).forEach((cid) => {
+    const btn = els.pokemonGrid?.querySelector(`[data-compare="${cid}"]`);
+    if (btn) { btn.textContent = "Comparé"; btn.classList.add("is-compare"); }
+  });
+
   void renderComparePanel();
 }
 
@@ -569,20 +581,27 @@ function initHeroParallax() {
     return;
   }
 
+  let heroRafId = null;
   heroSection.addEventListener("pointermove", (event) => {
-    const bounds = heroSection.getBoundingClientRect();
-    const x = event.clientX - bounds.left;
-    const y = event.clientY - bounds.top;
-    const rx = (0.5 - y / bounds.height) * 8;
-    const ry = ((x / bounds.width) - 0.5) * 10;
-
-    heroCopy.style.transform = `translate3d(0, 0, 30px) rotateX(${rx * 0.25}deg) rotateY(${ry * -0.18}deg)`;
-    heroCard.style.transform = `translate3d(0, 0, 0) rotateX(${rx}deg) rotateY(${ry}deg)`;
-    heroCard.style.setProperty("--hero-spot-x", `${x}px`);
-    heroCard.style.setProperty("--hero-spot-y", `${y}px`);
+    if (heroRafId) return;
+    const clientX = event.clientX;
+    const clientY = event.clientY;
+    heroRafId = requestAnimationFrame(() => {
+      const bounds = heroSection.getBoundingClientRect();
+      const x = clientX - bounds.left;
+      const y = clientY - bounds.top;
+      const rx = (0.5 - y / bounds.height) * 8;
+      const ry = ((x / bounds.width) - 0.5) * 10;
+      heroCopy.style.transform = `translate3d(0, 0, 30px) rotateX(${rx * 0.25}deg) rotateY(${ry * -0.18}deg)`;
+      heroCard.style.transform = `translate3d(0, 0, 0) rotateX(${rx}deg) rotateY(${ry}deg)`;
+      heroCard.style.setProperty("--hero-spot-x", `${x}px`);
+      heroCard.style.setProperty("--hero-spot-y", `${y}px`);
+      heroRafId = null;
+    });
   });
 
   heroSection.addEventListener("pointerleave", () => {
+    if (heroRafId) { cancelAnimationFrame(heroRafId); heroRafId = null; }
     heroCopy.style.transform = "";
     heroCard.style.transform = "";
     heroCard.style.removeProperty("--hero-spot-x");
@@ -827,10 +846,14 @@ async function openDetailModal(id) {
 }
 
 function bindControls() {
-  els.searchInput?.addEventListener("input", async () => {
-    state.search = els.searchInput.value.trim().toLowerCase();
-    state.visibleCount = PAGE_STEP;
-    await applyFilters();
+  let searchTimer = null;
+  els.searchInput?.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(async () => {
+      state.search = els.searchInput.value.trim().toLowerCase();
+      state.visibleCount = PAGE_STEP;
+      await applyFilters();
+    }, 220);
   });
 
   els.sortSelect?.addEventListener("change", async () => {
@@ -953,12 +976,12 @@ async function init() {
   renderLoadingState();
 
   try {
-    await fetchPokemonIndex();
-    els.metricTotal.textContent = String(state.allPokemon.length);
-    const [heroDetail, heroSpecies] = await Promise.all([
+    const [, heroDetail, heroSpecies] = await Promise.all([
+      fetchPokemonIndex(),
       getPokemonDetail(featuredHeroId),
       getPokemonSpecies(featuredHeroId),
     ]);
+    els.metricTotal.textContent = String(state.allPokemon.length);
     renderHeroFeature(heroDetail);
     if (els.heroFeatureName) {
       els.heroFeatureName.textContent = localizedSpeciesName(heroSpecies, heroDetail.name);
