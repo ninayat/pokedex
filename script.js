@@ -93,6 +93,9 @@ const els = {
   compareSlots: document.querySelector("#compare-slots"),
   compareStats: document.querySelector("#compare-stats"),
   compareClear: document.querySelector("#compare-clear"),
+  tcgGallery: document.querySelector("#tcg-gallery"),
+  tcgScroll: document.querySelector("#tcg-scroll"),
+  tcgCount: document.querySelector("#tcg-count"),
 };
 
 const revealItems = document.querySelectorAll(".reveal");
@@ -694,6 +697,63 @@ function renderHeroFeature(detail) {
   `;
 }
 
+const TCG_API = "https://api.tcgdex.net/v2/en";
+const tcgCache = new Map();
+
+async function fetchTcgCards(englishName) {
+  const key = englishName.toLowerCase();
+  if (tcgCache.has(key)) return tcgCache.get(key);
+
+  try {
+    const res = await fetch(`${TCG_API}/cards?name=${encodeURIComponent(englishName)}&limit=30`);
+    if (!res.ok) throw new Error("TCGdex error");
+    const cards = await res.json();
+    // Keep only cards with an image and that are Pokémon cards
+    const filtered = Array.isArray(cards)
+      ? cards.filter((c) => c.image)
+      : [];
+    tcgCache.set(key, filtered);
+    return filtered;
+  } catch {
+    tcgCache.set(key, []);
+    return [];
+  }
+}
+
+function renderTcgGallery(cards) {
+  if (!els.tcgGallery || !els.tcgScroll || !els.tcgCount) return;
+
+  if (!cards.length) {
+    els.tcgGallery.hidden = true;
+    return;
+  }
+
+  els.tcgGallery.hidden = false;
+  els.tcgCount.textContent = `${cards.length} carte${cards.length > 1 ? "s" : ""}`;
+
+  els.tcgScroll.innerHTML = cards
+    .map((card) => {
+      const imgSrc = `${card.image}.webp`;
+      const imgFallback = `${card.image}.png`;
+      const setName = card.set?.name || "";
+      const rarity = card.rarity || "";
+      return `
+        <a class="tcg-card-item" href="${card.image}.webp" target="_blank" rel="noopener noreferrer" aria-label="${card.name} — ${setName}">
+          <img
+            src="${imgSrc}"
+            alt="${card.name} — ${setName}"
+            loading="lazy"
+            decoding="async"
+            onerror="this.src='${imgFallback}'"
+          />
+          <p class="tcg-card-meta">${setName}</p>
+          ${rarity ? `<p class="tcg-card-rarity">${rarity}</p>` : ""}
+        </a>
+      `;
+    })
+    .join("");
+}
+
 async function openDetailModal(id) {
   if (!els.modal) {
     return;
@@ -701,6 +761,12 @@ async function openDetailModal(id) {
 
   els.detailName.textContent = "Chargement...";
   els.detailFlavor.textContent = "Récupération des données détaillées.";
+
+  // Reset TCG gallery while loading
+  if (els.tcgGallery) {
+    els.tcgGallery.hidden = true;
+    if (els.tcgScroll) els.tcgScroll.innerHTML = '<p class="tcg-loading">Recherche des cartes TCG…</p>';
+  }
 
   if (!els.modal.open) {
     els.modal.showModal();
@@ -743,10 +809,15 @@ async function openDetailModal(id) {
         `;
       })
       .join("");
+
+    // Fetch TCG cards in parallel — non-blocking
+    fetchTcgCards(capitalize(detail.name)).then(renderTcgGallery);
+
   } catch (error) {
     console.error(error);
     els.detailName.textContent = "Erreur de chargement";
     els.detailFlavor.textContent = "Impossible de récupérer la fiche détaillée pour le moment.";
+    if (els.tcgGallery) els.tcgGallery.hidden = true;
   }
 }
 

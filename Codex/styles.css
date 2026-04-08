@@ -1085,6 +1085,111 @@ img {
   margin-top: 0.4rem;
 }
 
+/* === TCG Gallery === */
+.tcg-gallery {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow-soft);
+}
+
+.tcg-gallery[hidden] {
+  display: none;
+}
+
+.tcg-gallery .detail-block-head {
+  margin-bottom: 0.9rem;
+}
+
+.detail-block-head-span {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.tcg-scroll {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.6rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--stroke) transparent;
+}
+
+.tcg-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tcg-scroll::-webkit-scrollbar-thumb {
+  background: var(--stroke);
+  border-radius: 999px;
+}
+
+.tcg-card-item {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  width: 9rem;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tcg-card-item img {
+  width: 100%;
+  border-radius: 0.8rem;
+  box-shadow: 0 6px 16px rgba(60, 31, 17, 0.18);
+  transition: transform 240ms var(--ease), box-shadow 240ms var(--ease);
+  display: block;
+  background: var(--surface);
+}
+
+.tcg-card-item:hover img {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 12px 28px rgba(60, 31, 17, 0.24);
+}
+
+.tcg-card-meta {
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tcg-card-rarity {
+  font-size: 0.65rem;
+  color: var(--accent-deep);
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tcg-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  padding: 0.5rem 0;
+}
+
+.tcg-empty {
+  color: var(--muted);
+  font-size: 0.88rem;
+  padding: 0.5rem 0;
+}
+
+/* === end TCG Gallery === */
+
 .reveal {
   opacity: 0;
   transform: translateY(22px);
