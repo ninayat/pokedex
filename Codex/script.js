@@ -152,7 +152,8 @@ function saveFavorites() {
 }
 
 function generationForId(id) {
-  return generationRanges.find((generation) => id >= generation.min && id <= generation.max) || generationRanges[0];
+  // Skip the "all" entry — we need the specific generation key
+  return generationRanges.find((g) => g.key !== "all" && id >= g.min && id <= g.max) || generationRanges[0];
 }
 
 function typeLabel(type) {
