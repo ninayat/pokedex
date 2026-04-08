@@ -1111,32 +1111,22 @@ img {
 }
 
 .tcg-scroll {
-  display: flex;
-  gap: 0.75rem;
-  overflow-x: auto;
-  padding-bottom: 0.6rem;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: var(--stroke) transparent;
-}
-
-.tcg-scroll::-webkit-scrollbar {
-  height: 4px;
-}
-
-.tcg-scroll::-webkit-scrollbar-thumb {
-  background: var(--stroke);
-  border-radius: 999px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
 }
 
 .tcg-card-item {
-  flex-shrink: 0;
-  scroll-snap-align: start;
-  width: 9rem;
   cursor: pointer;
-  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: center;
   color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 .tcg-card-item img {
@@ -1151,6 +1141,57 @@ img {
 .tcg-card-item:hover img {
   transform: translateY(-4px) scale(1.03);
   box-shadow: 0 12px 28px rgba(60, 31, 17, 0.24);
+}
+
+/* === TCG Lightbox === */
+.tcg-lightbox {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(88vw, 380px);
+  max-height: 90vh;
+  border: none;
+  background: transparent;
+  padding: 0;
+  overflow: visible;
+}
+
+.tcg-lightbox::backdrop {
+  background: rgba(24, 21, 17, 0.84);
+  backdrop-filter: blur(6px);
+}
+
+.tcg-lightbox-img {
+  width: 100%;
+  height: auto;
+  border-radius: 1.2rem;
+  box-shadow: 0 32px 80px rgba(24, 21, 17, 0.5);
+  display: block;
+}
+
+.tcg-lightbox-close {
+  position: absolute;
+  top: -0.9rem;
+  right: -0.9rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #fff8ef;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(218, 70, 48, 0.45);
+  transition: transform 150ms var(--ease);
+  z-index: 1;
+}
+
+.tcg-lightbox-close:hover {
+  transform: scale(1.12);
 }
 
 .tcg-card-meta {

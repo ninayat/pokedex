@@ -96,6 +96,9 @@ const els = {
   tcgGallery: document.querySelector("#tcg-gallery"),
   tcgScroll: document.querySelector("#tcg-scroll"),
   tcgCount: document.querySelector("#tcg-count"),
+  tcgLightbox: document.querySelector("#tcg-lightbox"),
+  tcgLightboxImg: document.querySelector("#tcg-lightbox-img"),
+  tcgLightboxClose: document.querySelector("#tcg-lightbox-close"),
 };
 
 const revealItems = document.querySelectorAll(".reveal");
@@ -751,18 +754,19 @@ function renderTcgGallery(cards) {
       const imgFallback = `${card.image}.png`;
       const setName = card.set?.name || "";
       const rarity = card.rarity || "";
+      const alt = `${card.name}${setName ? " — " + setName : ""}`;
       return `
-        <a class="tcg-card-item" href="${card.image}.webp" target="_blank" rel="noopener noreferrer" aria-label="${card.name} — ${setName}">
+        <button class="tcg-card-item" type="button" data-img="${imgSrc}" data-fallback="${imgFallback}" data-alt="${alt}" aria-label="Agrandir ${alt}">
           <img
             src="${imgSrc}"
-            alt="${card.name} — ${setName}"
+            alt="${alt}"
             loading="lazy"
             decoding="async"
             onerror="this.src='${imgFallback}'"
           />
           <p class="tcg-card-meta">${setName}</p>
           ${rarity ? `<p class="tcg-card-rarity">${rarity}</p>` : ""}
-        </a>
+        </button>
       `;
     })
     .join("");
@@ -903,6 +907,22 @@ function bindControls() {
       }
     });
   }
+
+  // TCG lightbox — ouvrir au clic sur une carte
+  els.tcgScroll?.addEventListener("click", (e) => {
+    const item = e.target.closest(".tcg-card-item");
+    if (!item || !els.tcgLightbox) return;
+    els.tcgLightboxImg.src = item.dataset.img;
+    els.tcgLightboxImg.alt = item.dataset.alt;
+    els.tcgLightboxImg.onerror = () => { els.tcgLightboxImg.src = item.dataset.fallback; };
+    els.tcgLightbox.showModal();
+  });
+
+  els.tcgLightboxClose?.addEventListener("click", () => els.tcgLightbox?.close());
+
+  els.tcgLightbox?.addEventListener("click", (e) => {
+    if (e.target === els.tcgLightbox) els.tcgLightbox.close();
+  });
 
   // Swipe bas sur le modal pour le fermer
   if (els.modal && !prefersReducedMotion.matches) {
