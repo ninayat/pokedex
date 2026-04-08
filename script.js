@@ -697,20 +697,34 @@ function renderHeroFeature(detail) {
   `;
 }
 
-const TCG_API = "https://api.tcgdex.net/v2/en";
+const TCG_GRAPHQL = "https://api.tcgdex.net/v2/graphql";
 const tcgCache = new Map();
 
 async function fetchTcgCards(englishName) {
   const key = englishName.toLowerCase();
   if (tcgCache.has(key)) return tcgCache.get(key);
 
+  const query = `
+    query Cards($name: String, $first: Int) {
+      cards(filters: { name: $name }, pagination: { first: $first }) {
+        name
+        image
+        rarity
+        set { name }
+      }
+    }
+  `;
+
   try {
-    const res = await fetch(`${TCG_API}/cards?name=${encodeURIComponent(englishName)}&limit=30`);
-    if (!res.ok) throw new Error("TCGdex error");
-    const cards = await res.json();
-    // Keep only cards with an image and that are Pokémon cards
-    const filtered = Array.isArray(cards)
-      ? cards.filter((c) => c.image)
+    const res = await fetch(TCG_GRAPHQL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, variables: { name: englishName, first: 30 } }),
+    });
+    if (!res.ok) throw new Error("TCGdex GraphQL error");
+    const { data } = await res.json();
+    const filtered = Array.isArray(data?.cards)
+      ? data.cards.filter((c) => c.image)
       : [];
     tcgCache.set(key, filtered);
     return filtered;
