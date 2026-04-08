@@ -700,22 +700,26 @@ function renderHeroFeature(detail) {
   `;
 }
 
-const TCG_REST = "https://api.tcgdex.net/v2/en";
+const TCG_REST_FR = "https://api.tcgdex.net/v2/fr";
+const TCG_REST_EN = "https://api.tcgdex.net/v2/en";
 const tcgCache = new Map();
 
-async function fetchTcgCards(englishName) {
-  const key = englishName.toLowerCase();
+async function fetchTcgCards(frName, enName) {
+  const key = frName.toLowerCase();
   if (tcgCache.has(key)) return tcgCache.get(key);
 
-  try {
-    const res = await fetch(`${TCG_REST}/cards?name=${encodeURIComponent(englishName)}`);
+  const tryFetch = async (base, name) => {
+    const res = await fetch(`${base}/cards?name=${encodeURIComponent(name)}`);
     if (!res.ok) throw new Error(`TCGdex HTTP ${res.status}`);
     const data = await res.json();
-    const filtered = Array.isArray(data)
-      ? data.filter((c) => c.image).slice(0, 30)
-      : [];
-    tcgCache.set(key, filtered);
-    return filtered;
+    return Array.isArray(data) ? data.filter((c) => c.image).slice(0, 30) : [];
+  };
+
+  try {
+    let cards = await tryFetch(TCG_REST_FR, frName);
+    if (!cards.length) cards = await tryFetch(TCG_REST_EN, enName);
+    tcgCache.set(key, cards);
+    return cards;
   } catch (err) {
     console.warn("[TCG]", err);
     tcgCache.set(key, []);
@@ -810,9 +814,9 @@ async function openDetailModal(id) {
       })
       .join("");
 
-    // Fetch TCG cards in parallel — non-blocking
-    const tcgName = detail.name.charAt(0).toUpperCase() + detail.name.slice(1);
-    fetchTcgCards(tcgName).then(renderTcgGallery);
+    // Fetch TCG cards — français en priorité, fallback anglais
+    const enName = detail.name.charAt(0).toUpperCase() + detail.name.slice(1);
+    fetchTcgCards(frenchName, enName).then(renderTcgGallery);
 
   } catch (error) {
     console.error(error);
