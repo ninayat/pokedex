@@ -708,8 +708,8 @@ async function fetchTcgCards(englishName) {
   if (tcgCache.has(key)) return tcgCache.get(key);
 
   const query = `
-    query Cards($name: String, $first: Int) {
-      cards(filters: { name: $name }, pagination: { first: $first }) {
+    query ($name: String) {
+      cards(filters: { name: $name }) {
         name
         image
         rarity
@@ -722,16 +722,18 @@ async function fetchTcgCards(englishName) {
     const res = await fetch(TCG_GRAPHQL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, variables: { name: englishName, first: 30 } }),
+      body: JSON.stringify({ query, variables: { name: englishName } }),
     });
     if (!res.ok) throw new Error("TCGdex GraphQL error");
-    const { data } = await res.json();
-    const filtered = Array.isArray(data?.cards)
-      ? data.cards.filter((c) => c.image)
+    const json = await res.json();
+    if (json.errors?.length) throw new Error(json.errors[0].message);
+    const filtered = Array.isArray(json.data?.cards)
+      ? json.data.cards.filter((c) => c.image).slice(0, 30)
       : [];
     tcgCache.set(key, filtered);
     return filtered;
-  } catch {
+  } catch (err) {
+    console.warn("[TCG]", err);
     tcgCache.set(key, []);
     return [];
   }
@@ -829,7 +831,8 @@ async function openDetailModal(id) {
       .join("");
 
     // Fetch TCG cards in parallel — non-blocking
-    fetchTcgCards(capitalize(detail.name)).then(renderTcgGallery);
+    const tcgName = detail.name.charAt(0).toUpperCase() + detail.name.slice(1);
+    fetchTcgCards(tcgName).then(renderTcgGallery);
 
   } catch (error) {
     console.error(error);
