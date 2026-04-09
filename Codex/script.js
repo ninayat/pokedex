@@ -775,6 +775,8 @@ function renderTcgGallery(cards) {
       `;
     })
     .join("");
+
+  bindTcgTilt();
 }
 
 async function openDetailModal(id) {
@@ -934,19 +936,40 @@ function bindControls() {
     if (e.target === els.tcgLightbox) els.tcgLightbox.close();
   });
 
-  // Swipe bas sur le modal pour le fermer
-  if (els.modal && !prefersReducedMotion.matches) {
-    let modalTouchStartY = 0;
-    els.modal.addEventListener("touchstart", (e) => {
-      modalTouchStartY = e.touches[0].clientY;
+}
+
+function bindTcgTilt() {
+  if (prefersReducedMotion.matches || !els.tcgScroll) return;
+
+  els.tcgScroll.querySelectorAll(".tcg-card-item").forEach((card) => {
+    let rafId = null;
+
+    const applyTilt = (clientX, clientY) => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        const b = card.getBoundingClientRect();
+        const rx = (0.5 - (clientY - b.top)  / b.height) * 18;
+        const ry = ((clientX - b.left) / b.width - 0.5)  * 24;
+        card.style.transition = "none";
+        card.style.transform = `perspective(500px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.05)`;
+        rafId = null;
+      });
+    };
+
+    const resetTilt = () => {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      card.style.transition = "";
+      card.style.transform = "";
+    };
+
+    card.addEventListener("pointermove", (e) => applyTilt(e.clientX, e.clientY));
+    card.addEventListener("pointerleave", resetTilt);
+    card.addEventListener("touchmove", (e) => {
+      const t = e.touches[0];
+      applyTilt(t.clientX, t.clientY);
     }, { passive: true });
-    els.modal.addEventListener("touchend", (e) => {
-      const dy = e.changedTouches[0].clientY - modalTouchStartY;
-      if (dy > 80) {
-        els.modal.close();
-      }
-    }, { passive: true });
-  }
+    card.addEventListener("touchend", resetTilt, { passive: true });
+  });
 }
 
 function renderLoadingState() {

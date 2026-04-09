@@ -1134,20 +1134,23 @@ img {
   flex-direction: column;
   align-items: center;
   width: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 420ms var(--ease);
 }
 
 .tcg-card-item img {
   width: 100%;
   border-radius: 0.8rem;
   box-shadow: 0 6px 16px rgba(60, 31, 17, 0.18);
-  transition: transform 240ms var(--ease), box-shadow 240ms var(--ease);
   display: block;
   background: var(--surface);
+  pointer-events: none;
+  transition: box-shadow 420ms var(--ease);
 }
 
 .tcg-card-item:hover img {
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 12px 28px rgba(60, 31, 17, 0.24);
+  box-shadow: 0 16px 36px rgba(60, 31, 17, 0.28);
 }
 
 /* === TCG Lightbox === */
