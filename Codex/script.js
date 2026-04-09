@@ -936,6 +936,53 @@ function bindControls() {
     if (e.target === els.tcgLightbox) els.tcgLightbox.close();
   });
 
+  // Réinitialise le tilt quand la lightbox se ferme
+  els.tcgLightbox?.addEventListener("close", () => {
+    if (els.tcgLightboxImg) {
+      els.tcgLightboxImg.style.transition = "";
+      els.tcgLightboxImg.style.transform = "";
+      els.tcgLightboxImg.style.boxShadow = "";
+    }
+  });
+
+  // Tilt 3D sur l'image en grand écran
+  if (els.tcgLightboxImg) {
+    let lbRafId = null;
+
+    const applyLbTilt = (clientX, clientY) => {
+      if (lbRafId) return;
+      lbRafId = requestAnimationFrame(() => {
+        const b = els.tcgLightboxImg.getBoundingClientRect();
+        if (!b.width || !b.height) { lbRafId = null; return; }
+        const rx = (0.5 - (clientY - b.top)  / b.height) * 14;
+        const ry = ((clientX - b.left) / b.width - 0.5)  * 18;
+        els.tcgLightboxImg.style.transition = "none";
+        els.tcgLightboxImg.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.03)`;
+        els.tcgLightboxImg.style.boxShadow = `${ry * -1.2}px ${rx * 0.8 + 24}px 70px rgba(24,21,17,0.55)`;
+        lbRafId = null;
+      });
+    };
+
+    const resetLbTilt = () => {
+      if (lbRafId) { cancelAnimationFrame(lbRafId); lbRafId = null; }
+      els.tcgLightboxImg.style.transition = "transform 500ms ease, box-shadow 500ms ease";
+      els.tcgLightboxImg.style.transform = "";
+      els.tcgLightboxImg.style.boxShadow = "";
+    };
+
+    els.tcgLightboxImg.addEventListener("mousemove", (e) => applyLbTilt(e.clientX, e.clientY));
+    els.tcgLightboxImg.addEventListener("mouseleave", resetLbTilt);
+    els.tcgLightboxImg.addEventListener("touchstart", (e) => {
+      const t = e.touches[0];
+      applyLbTilt(t.clientX, t.clientY);
+    }, { passive: true });
+    els.tcgLightboxImg.addEventListener("touchmove", (e) => {
+      const t = e.touches[0];
+      applyLbTilt(t.clientX, t.clientY);
+    }, { passive: true });
+    els.tcgLightboxImg.addEventListener("touchend", resetLbTilt, { passive: true });
+  }
+
 }
 
 function bindTcgTilt() {

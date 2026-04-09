@@ -1173,6 +1173,8 @@ img {
   border-radius: 1.2rem;
   box-shadow: 0 32px 80px rgba(24, 21, 17, 0.5);
   display: block;
+  will-change: transform;
+  cursor: grab;
 }
 
 .tcg-lightbox-close {
