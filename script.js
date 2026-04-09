@@ -942,24 +942,29 @@ function bindTcgTilt() {
   if (prefersReducedMotion.matches || !els.tcgScroll) return;
 
   els.tcgScroll.querySelectorAll(".tcg-card-item").forEach((card) => {
+    const img = card.querySelector("img");
+    if (!img) return;
     let rafId = null;
 
     const applyTilt = (clientX, clientY) => {
       if (rafId) return;
       rafId = requestAnimationFrame(() => {
         const b = card.getBoundingClientRect();
+        if (!b.width || !b.height) { rafId = null; return; }
         const rx = (0.5 - (clientY - b.top)  / b.height) * 18;
         const ry = ((clientX - b.left) / b.width - 0.5)  * 24;
-        card.style.transition = "none";
-        card.style.transform = `perspective(500px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.05)`;
+        img.style.transition = "none";
+        img.style.transform = `perspective(400px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.06)`;
+        img.style.boxShadow = `${ry * -0.4}px ${rx * 0.4 + 10}px 32px rgba(60,31,17,0.30)`;
         rafId = null;
       });
     };
 
     const resetTilt = () => {
       if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-      card.style.transition = "";
-      card.style.transform = "";
+      img.style.transition = "transform 400ms ease, box-shadow 400ms ease";
+      img.style.transform = "";
+      img.style.boxShadow = "";
     };
 
     card.addEventListener("pointermove", (e) => applyTilt(e.clientX, e.clientY));
