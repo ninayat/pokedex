@@ -1142,7 +1142,6 @@ img {
   box-shadow: 0 6px 16px rgba(60, 31, 17, 0.18);
   display: block;
   background: var(--surface);
-  pointer-events: none;
   will-change: transform;
 }
 

@@ -939,17 +939,15 @@ function bindControls() {
 }
 
 function bindTcgTilt() {
-  if (prefersReducedMotion.matches || !els.tcgScroll) return;
+  if (!els.tcgScroll) return;
 
-  els.tcgScroll.querySelectorAll(".tcg-card-item").forEach((card) => {
-    const img = card.querySelector("img");
-    if (!img) return;
+  els.tcgScroll.querySelectorAll(".tcg-card-item img").forEach((img) => {
     let rafId = null;
 
     const applyTilt = (clientX, clientY) => {
       if (rafId) return;
       rafId = requestAnimationFrame(() => {
-        const b = card.getBoundingClientRect();
+        const b = img.getBoundingClientRect();
         if (!b.width || !b.height) { rafId = null; return; }
         const rx = (0.5 - (clientY - b.top)  / b.height) * 18;
         const ry = ((clientX - b.left) / b.width - 0.5)  * 24;
@@ -967,13 +965,17 @@ function bindTcgTilt() {
       img.style.boxShadow = "";
     };
 
-    card.addEventListener("pointermove", (e) => applyTilt(e.clientX, e.clientY));
-    card.addEventListener("pointerleave", resetTilt);
-    card.addEventListener("touchmove", (e) => {
+    img.addEventListener("mousemove", (e) => applyTilt(e.clientX, e.clientY));
+    img.addEventListener("mouseleave", resetTilt);
+    img.addEventListener("touchstart", (e) => {
       const t = e.touches[0];
       applyTilt(t.clientX, t.clientY);
     }, { passive: true });
-    card.addEventListener("touchend", resetTilt, { passive: true });
+    img.addEventListener("touchmove", (e) => {
+      const t = e.touches[0];
+      applyTilt(t.clientX, t.clientY);
+    }, { passive: true });
+    img.addEventListener("touchend", resetTilt, { passive: true });
   });
 }
 
